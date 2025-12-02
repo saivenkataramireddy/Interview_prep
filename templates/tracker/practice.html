@@ -1,0 +1,263 @@
+{% extends 'tracker/base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+:root{
+  --accent:#ffd166;
+  --accent-2:#ff9a5c;
+  --muted:#9aa7bd;
+  --glass: rgba(255,255,255,0.03);
+  --radius:16px;
+  --card-bg: linear-gradient(180deg, rgba(255,255,255,0.015), rgba(255,255,255,0.01));
+}
+
+/* page layout */
+.practice-wrap{
+  max-width:1150px;
+  margin:26px auto;
+  padding:18px;
+}
+
+/* heading */
+.page-head{
+  text-align:center;
+  margin-bottom:18px;
+}
+.page-head h3{ margin:0; color:#fff; font-weight:800; letter-spacing:-0.2px; }
+.page-head p{ margin:0; color:var(--muted); margin-top:6px; }
+
+/* grid */
+.grid {
+  display:grid;
+  grid-template-columns: 380px 1fr;
+  gap:20px;
+}
+
+/* left card */
+.card-left{
+  border-radius:var(--radius);
+  padding:18px;
+  background:var(--card-bg);
+  border:1px solid rgba(255,255,255,0.04);
+  box-shadow: 0 18px 48px rgba(0,0,0,0.55);
+}
+.card-left h5{ margin:0 0 12px 0; color:#fff; font-weight:800; }
+.small-muted{ color:var(--muted); font-size:0.95rem; }
+
+/* selects */
+.form-select, .btn {
+  border-radius:12px !important;
+}
+.form-select{
+  background: rgba(255,255,255,0.03) !important;
+  color:#fff !important;
+  border:1px solid rgba(255,255,255,0.06) !important;
+  height:46px;
+}
+
+/* ✅ ONLY CHANGE ADDED → category + topic dropdown options black */
+#category-select,
+#category-select option,
+#topic-select,
+#topic-select option {
+  color:white !important;
+}
+#category-select option,
+#topic-select option {
+  background: black !important;
+}
+
+/* start button */
+.btn-start{
+  width:100%;
+  margin-top:10px;
+  height:46px;
+  border-radius:12px;
+  background: linear-gradient(90deg,var(--accent),var(--accent-2));
+  color:#07101a;
+  font-weight:800;
+}
+
+/* right card */
+.card-right{
+  border-radius:var(--radius);
+  padding:20px;
+  background:var(--card-bg);
+  border:1px solid rgba(255,255,255,0.04);
+  box-shadow: 0 18px 48px rgba(0,0,0,0.55);
+}
+
+/* question header */
+.q-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:12px;
+}
+.q-header .pill{
+  background: rgba(255,255,255,0.02);
+  padding:8px 10px;
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,0.03);
+  color:var(--muted);
+  font-weight:700;
+}
+
+/* question text */
+.question-box{
+  background: rgba(255,255,255,0.01);
+  padding:16px;
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,0.03);
+  margin-bottom:14px;
+  color:#fff;
+}
+
+/* options */
+.form-check {
+  background: rgba(255,255,255,0.015);
+  padding:10px;
+  border-radius:10px;
+  margin-bottom:8px;
+  border:1px solid rgba(255,255,255,0.02);
+}
+.form-check-label{ color:#fff; font-weight:600; }
+
+/* buttons */
+.btn-next{
+  border-radius:12px;
+  padding:10px 14px;
+  font-weight:800;
+}
+.btn-next.btn-success{ background: linear-gradient(90deg,#7ee0a6,#2bb673); border:none; color:#07101a; }
+.btn-submit.btn-danger{ background: linear-gradient(90deg,#ff9a5c,#ff6a3c); border:none; color:#07101a; }
+
+/* helper text when no question */
+.empty-note{
+  color:var(--muted);
+  text-align:center;
+  padding:28px 12px;
+}
+
+/* responsive */
+@media (max-width: 980px){
+  .grid{ grid-template-columns: 1fr; }
+  .card-left{ order:2; }
+  .card-right{ order:1; }
+}
+</style>
+
+<div class="practice-wrap">
+  <div class="page-head">
+    <h3>Practice Interview Questions</h3>
+    <p>Choose a topic and work through timed practice questions — keep track of progress as you go.</p>
+  </div>
+
+  <div class="grid">
+
+    <!-- LEFT: category & topic -->
+    <div class="card-left" aria-labelledby="choose-heading">
+      <h5 id="choose-heading">1️⃣ Choose Category & Topic</h5>
+      <p class="small-muted">Pick a category and topic to start a practice test. You can change difficulty in the test flow.</p>
+
+      <form method="post" id="startForm">
+        {% csrf_token %}
+        <input type="hidden" name="mode" value="start_test">
+
+        <div class="mb-3 mt-3">
+          <label class="form-label small text-light">Category</label>
+          <select name="category" id="category-select" class="form-select" required>
+            <option value="">-- Select Category --</option>
+            {% for c in categories %}
+            <option value="{{ c }}" {% if selected_category == c %}selected{% endif %}>{{ c }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label small text-light">Topic</label>
+          <select name="topic" id="topic-select" class="form-select" required>
+            <option value="">-- Select Topic --</option>
+            <!-- populated by JS -->
+          </select>
+        </div>
+
+        <button type="submit" class="btn-start" aria-label="Start test">Start Test 🚀</button>
+      </form>
+    </div>
+
+    <!-- RIGHT: question area -->
+    <div class="card-right" aria-live="polite">
+      <h5 style="margin-top:0; color:#fff; font-weight:800;">2️⃣ Answer the Questions</h5>
+
+      {% if question %}
+        <div class="q-header">
+          <div class="pill">Question {{ index }} / {{ total }}</div>
+          <div class="small-muted">Topic: <strong style="color:#fff;">{{ selected_topic|default:'—' }}</strong></div>
+        </div>
+
+        <div class="question-box">
+          <p class="mb-0"><strong>{{ question.question }}</strong></p>
+        </div>
+
+        <form method="post" id="answerForm">
+          {% csrf_token %}
+          <div class="mb-3">
+            {% for key, text in options.items %}
+              {% if text %}
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="answer" id="opt{{ key }}" value="{{ key }}" required>
+                  <label class="form-check-label" for="opt{{ key }}">
+                    <strong>{{ key }}.</strong> {{ text }}
+                  </label>
+                </div>
+              {% endif %}
+            {% endfor %}
+          </div>
+
+          {% if index == total %}
+            <button type="submit" name="mode" value="submit_test" class="btn-next btn-submit btn-danger">Submit Test 🏁</button>
+          {% else %}
+            <button type="submit" name="mode" value="next_question" class="btn-next btn-next btn-success">Next ➜</button>
+          {% endif %}
+        </form>
+
+      {% else %}
+        <div class="empty-note">
+          👈 Select a category & topic on the left, then click <strong>Start Test</strong> to begin practicing.
+        </div>
+      {% endif %}
+
+    </div>
+  </div>
+</div>
+
+<!-- Topics data + dynamic population -->
+<script>
+  const topicsData = {{ topics_by_category|safe }};
+  const catSelect = document.getElementById("category-select");
+  const topicSelect = document.getElementById("topic-select");
+
+  function loadTopics() {
+    const cat = catSelect.value;
+    topicSelect.innerHTML = '<option value="">-- Select Topic --</option>';
+
+    if (topicsData && topicsData[cat]) {
+      topicsData[cat].forEach(topic => {
+        const opt = document.createElement("option");
+        opt.value = topic;
+        opt.textContent = topic;
+        if (topic === "{{ selected_topic|escapejs }}") opt.selected = true;
+        topicSelect.appendChild(opt);
+      });
+    }
+  }
+
+  if (catSelect) {
+    catSelect.addEventListener("change", loadTopics);
+    window.addEventListener('DOMContentLoaded', loadTopics);
+  }
+</script>
+{% endblock %}

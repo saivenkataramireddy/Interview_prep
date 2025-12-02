@@ -1,0 +1,33 @@
+{% extends 'tracker/base.html' %}
+{% block content %}
+
+<h3 class="mb-4">Topic: {{ topic }}</h3>
+
+<div class="card shadow-sm">
+  <div class="card-body">
+
+    <p><strong>Question {{ index }} of {{ total }}</strong></p>
+    <p>{{ question.question }}</p>
+
+    <form method="post">
+      {% csrf_token %}
+      {% if question.qtype == "MCQ" %}
+        {% if question.option_a %}<div><input type="radio" name="answer" value="A" required> A. {{ question.option_a }}</div>{% endif %}
+        {% if question.option_b %}<div><input type="radio" name="answer" value="B" required> B. {{ question.option_b }}</div>{% endif %}
+        {% if question.option_c %}<div><input type="radio" name="answer" value="C" required> C. {{ question.option_c }}</div>{% endif %}
+        {% if question.option_d %}<div><input type="radio" name="answer" value="D" required> D. {{ question.option_d }}</div>{% endif %}
+      {% endif %}
+
+      <button type="submit" class="btn btn-success mt-3 w-100">
+        {% if index == total %}
+          Submit Test
+        {% else %}
+          Next Question
+        {% endif %}
+      </button>
+    </form>
+
+  </div>
+</div>
+
+{% endblock %}

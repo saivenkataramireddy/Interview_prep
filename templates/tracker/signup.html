@@ -1,0 +1,265 @@
+{% extends 'tracker/base.html' %}
+{% load static %}
+
+{% block content %}
+
+<style>
+:root{
+  --accent:#ffd166;
+  --accent-2:#ff9a5c;
+  --muted:#9aa7bd;
+  --glass: rgba(255,255,255,0.03);
+  --radius:20px;
+}
+
+/* wrapper */
+.signup-wrap{
+  display:flex;
+  justify-content:center;
+  padding:28px 12px;
+}
+
+.signup-card{
+  width:100%;
+  max-width:980px;
+  display:grid;
+  grid-template-columns: 1fr 420px;
+  gap:22px;
+  border-radius:var(--radius);
+  overflow:hidden;
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  border:1px solid rgba(255,255,255,0.04);
+  box-shadow: 0 30px 80px rgba(0,0,0,0.6);
+  transform: translateY(10px);
+  opacity:0;
+  animation: enter 600ms cubic-bezier(.2,.9,.2,1) forwards 100ms;
+}
+
+/* left hero panel */
+.signup-left{
+  padding:34px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  gap:16px;
+  background: rgba(255,255,255,0.01);
+}
+
+.brand{
+  display:flex;
+  align-items:center;
+  gap:14px;
+}
+.brand-logo{
+  width:72px;
+  height:72px;
+  border-radius:14px;
+  padding:8px;
+  background:rgba(255,255,255,0.02);
+  border:1px solid rgba(255,255,255,0.04);
+}
+.brand-logo img{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+}
+
+.left-title{ font-size:1.5rem; font-weight:800; color:#fff; }
+.left-sub{ color:var(--muted); max-width:360px; line-height:1.5; }
+
+.feature-box{
+  padding:10px 12px;
+  background:rgba(255,255,255,0.02);
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,0.03);
+  margin-top:8px;
+}
+.feature-box strong{ color:#fff; font-size:0.95rem; }
+.feature-box small{ color:var(--muted); font-size:0.85rem; }
+
+/* right form panel */
+.signup-right{
+  padding:28px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.form-box{
+  width:100%;
+  max-width:360px;
+}
+
+.form-head{
+  text-align:center;
+  margin-bottom:16px;
+}
+.form-head h3{ color:#fff; font-weight:800; margin:0; }
+.form-head p{ color:var(--muted); margin:0; }
+
+/* inputs (Django form fields) */
+.form-box input{
+  width:100%;
+  height:48px;
+  border-radius:12px !important;
+  padding:10px 14px !important;
+  background:rgba(255,255,255,0.03) !important;
+  border:1px solid rgba(255,255,255,0.06) !important;
+  color:#fff !important;
+  font-size:0.95rem !important;
+  transition:0.2s ease;
+}
+
+.form-box input:focus{
+  box-shadow:0 8px 30px rgba(255,209,102,0.06);
+  transform:translateY(-2px);
+  border-color:rgba(255,209,102,0.35) !important;
+}
+
+/* Django errors */
+.errorlist{
+  color:#ff9a9a;
+  font-size:0.9rem;
+  margin:4px 0 0;
+  padding:0;
+  list-style:none;
+}
+
+/* submit */
+.btn-submit{
+  width:100%;
+  height:48px;
+  border-radius:12px;
+  border:none;
+  font-weight:800;
+  background: linear-gradient(90deg,var(--accent),var(--accent-2));
+  color:#0b0d12;
+  margin-top:10px;
+}
+
+/* footer */
+.card-footer{
+  text-align:center;
+  margin-top:14px;
+  color:var(--muted);
+}
+
+/* animation */
+@keyframes enter{ to{transform:none; opacity:1;} }
+
+/* responsive */
+@media(max-width:992px){
+  .signup-card{ grid-template-columns:1fr; }
+  .signup-left{ display:none; }
+}
+</style>
+
+<div class="signup-wrap">
+<div class="signup-card">
+
+  <!-- LEFT PANEL -->
+  <div class="signup-left" aria-hidden="true">
+    <div class="brand">
+      <div class="brand-logo">
+        <img src="{% static 'images/logo.jpeg' %}" alt="Logo">
+      </div>
+      <div>
+        <div class="left-title">Create Your Account</div>
+        <div class="left-sub">Start your interview preparation with structured topics, curated questions, and real mock sessions.</div>
+      </div>
+    </div>
+
+    <div class="feature-box">
+      <strong>Why Sign Up?</strong>
+      <small>Track your progress, save attempts, unlock mock interviews.</small>
+    </div>
+
+    <div class="feature-box">
+      <strong>Personalised Roadmap</strong>
+      <small>We generate a custom learning path based on your goals.</small>
+    </div>
+  </div>
+
+  <!-- RIGHT: DJANGO SIGNUP FORM -->
+  <div class="signup-right">
+    <div class="form-box">
+
+      <div class="form-head">
+        <h3>Create Account</h3>
+        <p>Sign up to continue</p>
+      </div>
+
+      <form method="post">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+
+        <div class="mb-3">
+          <label class="form-label text-light">Username</label>
+          {{ form.username }}
+          {{ form.username.errors }}
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label text-light">Email</label>
+          {{ form.email }}
+          {{ form.email.errors }}
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label text-light">Password</label>
+          {{ form.password1 }}
+          {{ form.password1.errors }}
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label text-light">Confirm Password</label>
+          {{ form.password2 }}
+          {{ form.password2.errors }}
+        </div>
+
+        <button type="submit" class="btn-submit">Create Account</button>
+
+        <div class="card-footer">
+          Already have an account?
+          <a href="{% url 'login' %}" style="color:var(--accent); font-weight:700; text-decoration:none;">Login</a>
+        </div>
+      </form>
+
+    </div>
+  </div>
+
+</div>
+</div>
+
+<script>
+/*
+  Small helper: when Django renders form fields without custom widget classes,
+  this script adds the expected classes so they pick up your CSS and Bootstrap styling.
+  It also copies the preceding label text into placeholder when none is present.
+  This is non-destructive and only runs on the client.
+*/
+(function(){
+  const formBox = document.querySelector('.form-box');
+  if (!formBox) return;
+
+  const inputs = formBox.querySelectorAll('input, select, textarea');
+  inputs.forEach(input => {
+    // add Bootstrap and your input style class if not present
+    input.classList.add('form-control');
+    input.classList.add('input-field');
+
+    // if input has no placeholder, attempt to find a preceding label inside the same .mb-3
+    if (!input.placeholder) {
+      const mb = input.closest('.mb-3');
+      if (mb) {
+        const label = mb.querySelector('label');
+        if (label && label.textContent.trim()) {
+          input.placeholder = label.textContent.trim();
+        }
+      }
+    }
+  });
+})();
+</script>
+
+{% endblock %}
